@@ -6,14 +6,14 @@
             <v-card-title>
                 <v-text-field
                     v-model="search"
+                    append-icon="mdi-magnify"
                     label="Search"
                     single-line
                     hide-details
                 ></v-text-field>
 
                 <v-spacer></v-spacer>
-
-                <v-btn color="warning" dark @click="history = true">
+                 <v-btn color="warning" dark @click="selesai = true">
                 ToDo Selesai
                 </v-btn>
 
@@ -42,19 +42,30 @@
                 </template>
 
                 <template v-slot:[`item.actions`]="{ item }">
-                    <v-btn small class="mr-2" @click="editItem(item)">
-                        edit
-                    </v-btn>
 
-                    <v-btn small @click="deleteItem(item)">
-                        delete
-                    </v-btn>
+                     <v-btn small class="mr-2" @click="editItem(item)">edit</v-btn>
+                     <v-btn small class="mr-2" @click="deleteItem(item)">delete</v-btn>
+
                 </template>
-
+                <template v-slot:[`item.checkbox`]="{ item }">
+          <input type="checkbox" @change="checking($event, item)">
+       </template>
             </v-data-table>
         </v-card>
+        <br>
+   <v-card>
+       Delete Multiple:
+        <ul v-for="(data, index) in check" :key="index">
+            <li>
+                {{ data.task }}
+            </li>
+        </ul>
+        <v-card-title>
+        <v-btn color="red" dark v-if="check.length" @click="deleteAll()">Delete All</v-btn>
+        </v-card-title>
+    </v-card>
 
-    <v-dialog v-model="history" >
+        <v-dialog v-model="selesai" >
 
         <v-card>
             <h3 class="text-h3 font-weight-medium mb-5">Finished ToDo List</h3>
@@ -127,26 +138,25 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     
-                    <v-btn color="blue darken-1" text @click="cancel">
+                    <v-btn color="blue" text @click="cancel">
                         Cancel
                     </v-btn>
 
                     <v-btn v-if="adding == true" 
-                        color="blue darken-1" 
+                        color="blue" 
                         text 
                         @click="save">
                         Save
                     </v-btn>
 
                     <v-btn v-else 
-                        color="blue darken-1" 
+                        color="blue" 
                         text 
                         @click="edit(formTodo)">
                         Save
                     </v-btn>
 
                 </v-card-actions>
-
             </v-card>
         </v-dialog>
 
@@ -155,18 +165,18 @@
             <v-card>
                 <v-card-title>
                     <span class="headline">
-                        Yakin ingin menghapus?
+                        Anda Yakin ingin menghapus?
                     </span>
                 </v-card-title>
 
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     
-                    <v-btn color="green darken-1" text @click="cancel">
+                    <v-btn color="green" text @click="cancel">
                         Tidak
                     </v-btn>
 
-                    <v-btn color="red darken-1" text @click="confirmdelete">
+                    <v-btn color="red" text @click="confirmdelete">
                         Ya
                     </v-btn>
 
@@ -175,11 +185,11 @@
             </v-card>
         </v-dialog>
 
-        
 
     </v-main>
 </template>
 <script>
+
 
 export default {
     name: "List",
@@ -190,10 +200,13 @@ export default {
             searchp: "All Priority",
             adding: true,
             edititem: null,
-            history: false,
+            check: [],
+     checkbox: false,
+            selesai: false,
             dialog: false,
             dialogdel: false,
             dialognote: false,
+    
 
             filters: {
                 search: '',
@@ -219,13 +232,14 @@ export default {
                     field: "note",
                     value: "note"
                 },
-
+                
                 { 
                     text: "Actions", 
                     value: "actions", 
                     sortable: false,
                 },
 
+                { text: "", value: "checkbox"},
             ],
 
             headers2: [
@@ -249,7 +263,7 @@ export default {
                 },
                 ],
 
-            ftodos: [
+                  ftodos: [
         
                 ],
 
@@ -258,16 +272,19 @@ export default {
                     task: "bernafas",
                     priority: "Penting",
                     note: "huffttt",
+            
                 },
                 {
                     task: "nongkrong",
                     priority: "Tidak penting",
                     note: "bersama tman2",
+               
                 },
                 {
                     task: "masak",
                     priority: "Biasa",
                     note: "masak air 500ml",
+               
                 },
             ],
 
@@ -275,6 +292,7 @@ export default {
                 task: null,
                 priority: null,
                 note: null,
+              
             },
         };
     },
@@ -318,6 +336,8 @@ export default {
             this.edititem = item;
         },
 
+       
+
         edit(formTodo) {
             this.edititem.task = formTodo.task;
             this.edititem.priority = formTodo.priority;
@@ -333,6 +353,28 @@ export default {
             };
         },
 
+        deleteAll() {
+      var i  ;
+        
+
+      
+      for(i in this.check){
+          this.ftodos.push(this.check[i])
+        this.todos.splice(this.check[i], 1)
+      }
+      this.check = []
+   },
+
+
+   checking(event, item) {
+       this.edititem= item;
+      if (event.target.checked){
+          this.check.push(item)
+      } else {
+        this.check.splice(this.check.indexOf(item), 1)
+      }
+   }
     },
 };
 </script>
+
